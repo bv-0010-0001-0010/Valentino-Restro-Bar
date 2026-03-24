@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -31,11 +31,35 @@
   <link rel="stylesheet" href="./assets/css/style.css">
 
   <!-- 
-    - preload images
+    - preload images & pdf for fast loading
   -->
+  <!-- Hero Sliders -->
   <link rel="preload" as="image" href="./assets/images/hero-slider-1.png">
   <link rel="preload" as="image" href="./assets/images/hero-slider-2.png">
   <link rel="preload" as="image" href="./assets/images/hero-slider-3.png">
+  <!-- Bar Section -->
+  <link rel="preload" as="image" href="./assets/images/special.png">
+  <link rel="preload" as="image" href="./assets/images/image5.png">
+  <link rel="preload" as="image" href="./assets/images/image3.png">
+  <!-- Menu Section -->
+  <link rel="preload" as="image" href="./assets/images/image(3).png">
+  <link rel="preload" as="image" href="./assets/images/image.png">
+  <link rel="preload" as="image" href="./assets/images/chicken65.jpg">
+  <link rel="preload" as="image" href="./assets/images/image(2).png">
+  <link rel="preload" as="image" href="./assets/images/image(1).png">
+  <link rel="preload" as="image" href="./assets/images/dalmakhni.jpg">
+  <!-- About Section -->
+  <link rel="preload" as="image" href="./assets/images/story2.jpeg">
+  <link rel="preload" as="image" href="./assets/images/ramand.jpeg">
+  <!-- Special Dish -->
+  <link rel="preload" as="image" href="./assets/images/woodfire-pizza.png">
+  <!-- Testimonials -->
+  <link rel="preload" as="image" href="./assets/images/ProfileImage.png">
+  <!-- Badges -->
+  <link rel="preload" as="image" href="./assets/images/badge-1.png">
+  <link rel="preload" as="image" href="./assets/images/badge-4.png">
+  <!-- PDF Menu -->
+  <link rel="prefetch" as="document" href="./assets/doc/ValentinoRestro&BarMenu.pdf">
 
 </head>
 
@@ -86,7 +110,7 @@
           <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
         </div>
 
-        <span class="span">+61 02 9098 2235</span>
+        <span class="span">+61 450 007 107</span>
       </a>
 
       <div class="separator"></div>
@@ -114,7 +138,7 @@
     <div class="container">
 
       <a href="#" class="logo">
-        <img src="./assets/images/Valentino.png" width="160" height="50" alt="Valentino - Home">
+        <img src="./assets/images/valentino-logo-edit.png" width="200" height="64" alt="Valentino - Home">
       </a>
 
       <nav class="navbar" data-navbar>
@@ -124,7 +148,7 @@
         </button>
 
         <a href="#" class="logo">
-          <img src="./assets/images/Valentino.png" width="160" height="50" alt="Valentino - Home">
+          <img src="./assets/images/valentino-logo-edit.png" width="200" height="64" alt="Valentino - Home">
         </a>
 
         <ul class="navbar-list">
@@ -138,7 +162,7 @@
           </li>
 
           <li class="navbar-item">
-            <a href="#menu" class="navbar-link hover-underline">
+            <a href="#" class="navbar-link hover-underline" data-menu-open>
               <div class="separator"></div>
 
               <span class="span">Menu</span>
@@ -146,14 +170,14 @@
           </li>
 
           <li class="navbar-item">
-            <a href="#" class="navbar-link hover-underline" data-menu-open>
+            <a href="#bar" class="navbar-link hover-underline">
               <div class="separator"></div>
               <span class="span">Bar</span>
             </a>
           </li>
 
           <li class="navbar-item">
-            <a href="#" class="navbar-link hover-underline" data-menu-open>
+            <a href="#menu" class="navbar-link hover-underline">
               <div class="separator"></div>
 
               <span class="span">Food</span>
@@ -187,7 +211,7 @@
           <p class="contact-label">Booking Request</p>
 
           <a href="tel:+61290982235" class="body-1 contact-number hover-underline">
-            +61 02 9098 2235
+            +61 450 007 107
           </a>
         </div>
 
@@ -305,7 +329,7 @@
         - #SERVICE
       -->
 
-      <section class="section service text-center" aria-label="service" style="background-color: var(--valentino-red);">
+      <section class="section service text-center" aria-label="service" id="bar" style="background-color: var(--valentino-red);">
         <div class="container">
 
           <p class="section-subtitle label-2">Bar</p>
@@ -323,7 +347,7 @@
 
                 <a href="#" class="has-before hover:shine">
                   <figure class="card-banner img-holder img-size-285-336">
-                    <img src="./assets/images/special.png" width="285" height="336" loading="lazy" alt="Breakfast"
+                    <img src="./assets/images/Signature-cocktail.jpg" width="285" height="336" loading="lazy" alt="Signature Cocktails"
                       class="img-cover">
                   </figure>
                 </a>
@@ -346,7 +370,7 @@
 
                 <a href="#" class="has-before hover:shine">
                   <figure class="card-banner img-holder img-size-285-336">
-                    <img src="./assets/images/image5.png" width="285" height="336" loading="lazy" alt="Appetizers"
+                    <img src="./assets/images/image5.png" width="285" height="336" loading="lazy" alt="Fine Bubbles"
                       class="img-cover">
                   </figure>
                 </a>
@@ -369,7 +393,7 @@
 
                 <a href="#" class="has-before hover:shine">
                   <figure class="card-banner img-holder img-size-285-336">
-                    <img src="./assets/images/image3.png" width="285" height="336" loading="lazy" alt="Drinks"
+                    <img src="./assets/images/image3.png" width="285" height="336" loading="lazy" alt="Premium Spirits"
                       class="img-cover">
                   </figure>
                 </a>
@@ -423,7 +447,7 @@
 
             <div class="contact-label">Connect with us</div>
 
-            <a href="tel:++61290982235" class="body-1 contact-number hover-underline">+61 02 9098 2235</a>
+            <a href="tel:++61290982235" class="body-1 contact-number hover-underline">+61 450 007 107</a>
 
             <a href="#" class="btn btn-primary">
               <span class="text text-1">Explore More</span>
@@ -435,21 +459,21 @@
 
           <figure class="about-banner">
 
-            <img src="./assets/images/story2.jpeg" width="570" height="570" loading="lazy" alt="about banner"
+            <img src="./assets/images/Team-Valentino.JPG" width="570" height="570" loading="lazy" alt="about banner"
               class="w-100" data-parallax-item data-parallax-speed="1">
 
-            <div class="abs-img abs-img-1 has-before" data-parallax-item data-parallax-speed="1.75">
+            <!-- <div class="abs-img abs-img-1 has-before" data-parallax-item data-parallax-speed="1.75">
               <img src="./assets/images/ramand.jpeg" width="285" height="285" loading="lazy" alt=""
                 class="w-100">
-            </div>
+            </div> -->
 
-            <div class="abs-img abs-img-2 has-before">
+            <!-- <div class="abs-img abs-img-2 has-before">
               <img src="./assets/images/badge-4.png" width="133" height="134" loading="lazy" alt="">
-            </div>
+            </div> -->
 
           </figure>
 
-          <img src="./assets/images/shape-3.png" width="197" height="194" loading="lazy" alt="" class="shape">
+          <!-- <img src="./assets/images/shape-3.png" width="197" height="194" loading="lazy" alt="" class="shape"> -->
 
         </div>
       </section>
@@ -465,7 +489,7 @@
       <section class="special-dish text-center" aria-labelledby="dish-label">
 
         <div class="special-dish-banner">
-          <img src="./assets/images/woodfire-pizza.png" width="940" height="900" loading="lazy" alt="special dish"
+          <img src="./assets/images/Pistachio Tiramisu.jpg" width="570" height="570" loading="lazy" alt="Pistachio Tiramisu"
             class="img-cover">
         </div>
 
@@ -474,17 +498,17 @@
 
             <img src="./assets/images/badge-1.png" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
 
-            <!-- <p class="section-subtitle label-2">Craver Saver</p> -->
+            <p class="section-subtitle label-2">Chef's Special</p>
 
-            <h2 class="headline-1 section-title">Margherita</h2>
+            <h2 class="headline-1 section-title">Pistachio Tiramisu</h2>
 
             <p class="section-text">
-              An Italian classic that needs no introduction ripe tomatoes, fresh mozzarella, and basil, brought together on a perfectly blistered crust for a taste that is pure and timeless.
+              A luscious twist on the classic Italian dessert, featuring layers of espresso-soaked ladyfingers and creamy mascarpone infused with the rich, nutty flavor of pistachios, crowned with a sprinkle of crushed pistachios for an irresistible crunch.
             </p>
 
-            <!-- <div class="wrapper">
-              <span class="span body-1">$14.99</span>
-            </div> -->
+            <div class="wrapper">
+              <span class="span body-1">$15.90</span>
+            </div>
 
             <a href="#" class="btn btn-primary">
               <span class="text text-1">Explore More</span>
@@ -538,6 +562,10 @@
                     <span class="span title-2">$19.00</span>
                   </div>
 
+                  <p class="card-text label-1">
+                    Crispy tortilla chips piled high with seasoned beef, cheese sauce, jalapeños, and fresh toppings.
+                  </p>
+
                 </div>
 
               </div>
@@ -563,6 +591,10 @@
                     <span class="span title-2">$14.99</span>
                   </div>
 
+                  <p class="card-text label-1">
+                    Rich and creamy New York style cheesecake with a buttery graham cracker crust.
+                  </p>
+
                 </div>
 
               </div>
@@ -585,6 +617,10 @@
 
                     <span class="span title-2">$18.00</span>
                   </div>
+
+                  <p class="card-text label-1">
+                    Tender chicken wings glazed in our signature spice blend, baked until crispy perfection.
+                  </p>
 
                 </div>
 
@@ -610,6 +646,10 @@
                     <span class="span title-2">$20.99</span>
                   </div>
 
+                  <p class="card-text label-1">
+                    Crispy fried chicken patty on a soft bun with lettuce, tomato, and our special sauce.
+                  </p>
+
                 </div>
 
               </div>
@@ -634,6 +674,10 @@
 
                     <span class="span title-2">$14.99</span>
                   </div>
+
+                  <p class="card-text label-1">
+                    Golden khoya dumplings soaked in warm saffron cardamom syrup. A timeless Indian dessert.
+                  </p>
                 </div>
 
               </div>
@@ -657,6 +701,10 @@
                     <span class="span title-2">$21.99</span>
                   </div>
 
+                  <p class="card-text label-1">
+                    Slow-cooked black lentils enriched with butter, cream, and aromatic spices. Pure comfort.
+                  </p>
+
                 </div>
 
               </div>
@@ -668,7 +716,7 @@
             All working hours from <span class="span">10:00 am</span> to <span class="span">10:00 pm</span>
           </p>
 
-          <a href="#" class="btn btn-primary">
+          <a href="#" class="btn btn-primary" data-menu-open>
             <span class="text text-1">View All Menu</span>
 
             <span class="text text-2" aria-hidden="true">View All Menu</span>
@@ -809,7 +857,7 @@
 
               <p class="contact-label"></p>
 
-              <a href="tel:+61290982235" class="body-1 contact-number hover-underline">+61 02 9098 2235</a>
+              <a href="tel:+61290982235" class="body-1 contact-number hover-underline">+61 450 007 107</a>
 
               <div class="separator"></div>
 
@@ -1042,7 +1090,7 @@
 
           <a href="mailto:atvalentinoo@gmail.com" class="body-4 contact-link">atvalentinoo@gmail.com</a>
 
-          <a href="tel:+61290982235" class="body-4 contact-link">Booking Request : +61 02 9098 2235</a>
+          <a href="tel:+61290982235" class="body-4 contact-link">Booking Request : +61 450 007 107</a>
 
           <p class="body-4">
             Open : 10:00 am - 10:00 pm
@@ -1131,7 +1179,7 @@
 
 
   <!-- MENU VIEWER OVERLAY -->
-  <!-- <section class="menu-overlay" data-menu-overlay aria-hidden="true">
+  <section class="menu-overlay" data-menu-overlay aria-hidden="true">
     <div class="menu-overlay-inner container">
 
       <div class="menu-overlay-header">
@@ -1143,15 +1191,14 @@
         </button>
       </div>
 
-      <div class="menu-overlay-content"> -->
-        <!-- BackbencherMenu.pdf should sit next to index.html -->
-        <!-- <object
-          data="./assets/doc/BackbencherMenu.pdf"
+      <div class="menu-overlay-content">
+        <object
+          data="./assets/doc/ValentinoRestro&BarMenu.pdf"
           type="application/pdf"
           class="menu-pdf">
           <p class="body-4">
-            Your browser can’t show PDFs inline.
-            <a href="./assets/doc/BackbencherMenu.pdf" class="btn-text hover-underline label-2">
+            Your browser can't show PDFs inline.
+            <a href="./assets/doc/ValentinoRestro&BarMenu.pdf" class="btn-text hover-underline label-2">
               Download the menu
             </a>
           </p>
@@ -1159,10 +1206,10 @@
       </div>
 
     </div>
-  </section> -->
+  </section>
 
   <!-- ORDERING OVERLAY -->
-  <!-- <section class="order-overlay" data-order-overlay aria-hidden="true">
+  <section class="order-overlay" data-order-overlay aria-hidden="true">
     <div class="order-overlay-inner container">
 
       <div class="order-overlay-header">
@@ -1174,16 +1221,16 @@
         </button>
       </div>
 
-      <div class="order-layout"> -->
+      <div class="order-layout">
 
         <!-- LEFT: menu items rendered from JS -->
-        <!-- <div class="order-menu-panel">
+        <div class="order-menu-panel">
           <p class="section-subtitle label-2">Choose from the menu</p>
           <div data-order-menu></div>
-        </div> -->
+        </div>
 
         <!-- RIGHT: cart + details -->
-        <!-- <div class="order-cart-panel">
+        <div class="order-cart-panel">
           <p class="section-subtitle label-2">Your Order</p>
 
           <ul class="order-cart-list" data-order-cart-list></ul>
@@ -1224,7 +1271,7 @@
       </div>
 
     </div>
-  </section> -->
+  </section>
 
 
 

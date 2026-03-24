@@ -37,13 +37,40 @@ const navbar = document.querySelector("[data-navbar]");
 const navTogglers = document.querySelectorAll("[data-nav-toggler]");
 const overlay = document.querySelector("[data-overlay]");
 
+const closeNavbar = function () {
+  navbar.classList.remove("active");
+  overlay.classList.remove("active");
+  document.body.classList.remove("nav-active");
+};
+
 const toggleNavbar = function () {
-  navbar.classList.toggle("active");
-  overlay.classList.toggle("active");
-  document.body.classList.toggle("nav-active");
+  const shouldOpen = !navbar.classList.contains("active");
+
+  if (shouldOpen) {
+    navbar.classList.add("active");
+    overlay.classList.add("active");
+    document.body.classList.add("nav-active");
+  } else {
+    closeNavbar();
+  }
 }
 
 addEventOnElements(navTogglers, "click", toggleNavbar);
+
+const navbarLinks = document.querySelectorAll(".navbar-link");
+
+addEventOnElements(navbarLinks, "click", function () {
+  const href = this.getAttribute("href") || "";
+  // Close navbar for internal section links and external links
+  const isInternalSectionLink = href.startsWith("#") && href.length > 1;
+  const isExternalLink = href.startsWith("./") || href.startsWith("http");
+
+  if (isInternalSectionLink || isExternalLink) {
+    closeNavbar();
+  }
+});
+
+window.addEventListener("hashchange", closeNavbar);
 
 
 
@@ -268,6 +295,7 @@ const closeOverlay = function (overlayEl, bodyClass) {
 
 addEventOnElements(menuOpenButtons, "click", function (event) {
   event.preventDefault();
+  closeNavbar();
   closeOverlay(orderOverlay, "order-open");
   openOverlay(menuOverlay, "menu-open");
 });
@@ -279,6 +307,7 @@ addEventOnElements(menuCloseButtons, "click", function (event) {
 
 addEventOnElements(orderOpenButtons, "click", function (event) {
   event.preventDefault();
+  closeNavbar();
   closeOverlay(menuOverlay, "menu-open");
   openOverlay(orderOverlay, "order-open");
 });
@@ -292,93 +321,98 @@ addEventOnElements(orderCloseButtons, "click", function (event) {
 
 
 /**
- * BACKBENCHER MENU DATA
- * (You can edit/add items here later if your menu changes)
+ * VALENTINO MENU DATA
+ * Updated with actual items from ValentinoRestro&BarMenu.pdf
  */
 
-const backbencherMenu = [
-  // Veg Entrees & Drinks
-  { id: "samosa-chat",        name: "Samosa Chat",            price: 11.99, category: "Veg Entrees" },
-  { id: "aloo-chat",          name: "Aloo Chat",              price: 10.99, category: "Veg Entrees" },
-  { id: "paneer-manchurian",  name: "Paneer Manchurian",      price: 15.99, category: "Veg Entrees" },
-  { id: "gobhi-manchurian",   name: "Gobhi Manchurian",       price: 15.99, category: "Veg Entrees" },
-  { id: "paneer-tikka-wrap",  name: "Paneer Tikka Wrap",      price: 15.99, category: "Veg Entrees" },
-  { id: "chicken-tikka-wrap", name: "Chicken Tikka Wrap",     price: 15.99, category: "Veg Entrees" },
+const valentinoMenu = [
+  // Soups & Salads
+  { id: "roasted-tomato-basil-soup",    name: "Roasted Tomato & Basil Soup",     price: 14.00, category: "Soups & Salads" },
+  { id: "wild-mushroom-veloute",        name: "Wild Mushroom Velouté",           price: 14.00, category: "Soups & Salads" },
+  { id: "caesar-salad",                 name: "Caesar Salad",                    price: 13.99, category: "Soups & Salads" },
+  { id: "chicken-caesar-salad",         name: "Chicken Caesar Salad",            price: 16.49, category: "Soups & Salads" },
+  { id: "quinoa-salad",                 name: "Quinoa Salad",                    price: 14.99, category: "Soups & Salads" },
 
-  { id: "aloo-paratha-1",     name: "Aloo Paratha (1pc)",     price: 8.99,  category: "Parathas" },
-  { id: "gobhi-paratha-1",    name: "Gobhi Paratha (1pc)",    price: 8.99,  category: "Parathas" },
-  { id: "muli-paratha-1",     name: "Muli Paratha (1pc)",     price: 8.99,  category: "Parathas" },
-  { id: "aloo-paratha-2",     name: "Aloo Paratha (2pcs)",    price: 15.99, category: "Parathas" },
-  { id: "gobhi-paratha-2",    name: "Gobhi Paratha (2pcs)",   price: 15.99, category: "Parathas" },
-  { id: "muli-paratha-2",     name: "Muli Paratha (2pcs)",    price: 15.99, category: "Parathas" },
+  // Nibbles & Sharing
+  { id: "onion-rings",                  name: "Onion Rings",                     price: 11.99, category: "Nibbles & Sharing" },
+  { id: "cajun-fries",                  name: "Cajun Fries",                     price: 11.99, category: "Nibbles & Sharing" },
+  { id: "mountain-masala-papad",        name: "Mountain Masala Papad",           price: 11.00, category: "Nibbles & Sharing" },
+  { id: "loaded-nachos",                name: "Loaded Nachos",                   price: 17.00, category: "Nibbles & Sharing" },
+  { id: "housemade-hummus",             name: "Housemade Hummus",                price: 14.00, category: "Nibbles & Sharing" },
+  { id: "spinach-artichoke-dip",        name: "Spinach Artichoke Dip",           price: 18.00, category: "Nibbles & Sharing" },
+  { id: "jalapeno-poppers",             name: "Jalapeño Poppers",                price: 14.00, category: "Nibbles & Sharing" },
+  { id: "corn-chips-guacamole",         name: "Corn Chips & Guacamole",          price: 15.00, category: "Nibbles & Sharing" },
 
-  { id: "pickle",             name: "Pickle",                 price: 1.59,  category: "Sides" },
-  { id: "curd",               name: "Curd",                   price: 2.99,  category: "Sides" },
+  // Grill & Seafood
+  { id: "paneer-tikka-kebab",           name: "Paneer Tikka Kebab (6)",          price: 19.49, category: "Grill & Seafood" },
+  { id: "chicken-tikka-kebab",          name: "Chicken Tikka Kebab (6)",         price: 21.99, category: "Grill & Seafood" },
+  { id: "malai-kebab",                  name: "Malai Kebab (6)",                 price: 21.99, category: "Grill & Seafood" },
+  { id: "lamb-cutlets",                 name: "Lamb Cutlets (4)",                price: 30.99, category: "Grill & Seafood" },
+  { id: "tandoori-prawns",              name: "Tandoori Prawns (8)",             price: 25.49, category: "Grill & Seafood" },
+  { id: "calamari-rings",               name: "Calamari Rings",                  price: 17.99, category: "Grill & Seafood" },
+  { id: "tempura-shrimp",               name: "Tempura Shrimp (8)",              price: 18.99, category: "Grill & Seafood" },
 
-  { id: "ginger-chai",        name: "Ginger Chai",            price: 3.99,  category: "Chai & Beverages" },
-  { id: "masala-chai",        name: "Masala Chai",            price: 3.99,  category: "Chai & Beverages" },
-  { id: "coffee",             name: "Coffee",                 price: 4.99,  category: "Chai & Beverages" },
-  { id: "mango-lassi",        name: "Mango Lassi",            price: 8.99,  category: "Chai & Beverages" },
-  { id: "badam-milk",         name: "Badam Milk",             price: 8.99,  category: "Chai & Beverages" },
-  { id: "cheeku-shake",       name: "Cheeku Shake",           price: 8.99,  category: "Chai & Beverages" },
-  { id: "custard-apple-shake",name: "Custard Apple Shake",    price: 8.99,  category: "Chai & Beverages" },
-  { id: "orange-juice",       name: "Orange Fresh Juice",     price: 8.99,  category: "Fresh Juice" },
-  { id: "apple-juice",        name: "Apple Fresh Juice",      price: 8.99,  category: "Fresh Juice" },
-  { id: "mixed-juice",        name: "Mixed Fresh Juice",      price: 10.99, category: "Fresh Juice" },
-  { id: "carrot-juice",       name: "Carrot Fresh Juice",     price: 8.99,  category: "Fresh Juice" },
+  // Burgers
+  { id: "veg-burger",                   name: "Veg Burger",                      price: 17.99, category: "Burgers" },
+  { id: "cheese-burger",                name: "Cheese Burger",                   price: 21.99, category: "Burgers" },
+  { id: "ultra-crunchy-chicken-burger", name: "Ultra Crunchy Chicken Burger",    price: 20.99, category: "Burgers" },
 
-  // Salads & Curries
-  { id: "chicken-tikka-salad",name: "Chicken Tikka Salad",    price: 15.99, category: "Salads" },
-  { id: "paneer-tikka-salad", name: "Paneer Tikka Salad",     price: 15.99, category: "Salads" },
-  { id: "quinoa-salad",       name: "Quinoa Salad",           price: 15.99, category: "Salads" },
+  // Wings
+  { id: "crispy-wings",                 name: "Crispy Wings (8 pcs)",            price: 18.00, category: "Wings" },
 
-  { id: "dal-makhni",         name: "Dal Makhni",             price: 19.99, category: "Curries" },
-  { id: "shahi-paneer",       name: "Shahi Paneer",           price: 20.99, category: "Curries" },
-  { id: "aloo-gobhi",         name: "Aloo Gobhi",             price: 19.99, category: "Curries" },
-  { id: "bhindi",             name: "Bhindi",                 price: 20.99, category: "Curries" },
-  { id: "palak-paneer",       name: "Palak Paneer",           price: 20.99, category: "Curries" },
-  { id: "butter-chicken",     name: "Butter Chicken",         price: 21.99, category: "Curries" },
-  { id: "kadhai-chicken",     name: "Kadhai Chicken",         price: 21.99, category: "Curries" },
+  // Pasta
+  { id: "basil-pasta",                  name: "Basil Pasta",                     price: 22.49, category: "Pasta" },
+  { id: "seafood-pasta",                name: "Seafood Pasta",                   price: 28.49, category: "Pasta" },
+  { id: "spicy-prawn-pasta",            name: "Spicy Prawn Pasta",               price: 26.49, category: "Pasta" },
+  { id: "boscaiola-pasta",              name: "Boscaiola Pasta",                 price: 26.49, category: "Pasta" },
+  { id: "arrabbiata-pasta",             name: "Arrabbiata Pasta",                price: 23.49, category: "Pasta" },
+  { id: "lamb-ragu-pasta",              name: "Lamb Ragù Pasta",                 price: 27.49, category: "Pasta" },
+  { id: "valentino-veggie-pasta",       name: "Valentino Veggie Pasta",          price: 22.49, category: "Pasta" },
+  { id: "sizzling-garlic-prawns",       name: "Sizzling Garlic Prawns",          price: 18.49, category: "Pasta" },
 
-  // Combos
-  { id: "dal-makhni-rice",    name: "Dal Makhni & Rice",      price: 15.99, category: "Combos" },
-  { id: "any-curry-rice",     name: "Any Curry & Rice",       price: 16.99, category: "Combos" },
-  { id: "chai-paratha-1",     name: "Chai & Paratha (1pc)",   price: 11.99, category: "Combos" },
-  { id: "chai-paratha-2",     name: "Chai & Paratha (2pcs)",  price: 16.99, category: "Combos" },
-  { id: "special-thali",      name: "Special Thali Combo",    price: 21.99, category: "Combos" },
-  { id: "thali-combo",        name: "Thali Combo",            price: 18.99, category: "Combos" },
+  // Tacos
+  { id: "cauliflower-taco",             name: "Cauliflower Taco",                price: 14.99, category: "Tacos" },
+  { id: "chicken-taco",                 name: "Chicken Taco",                    price: 14.99, category: "Tacos" },
+  { id: "beef-taco",                    name: "Beef Taco",                       price: 15.99, category: "Tacos" },
+  { id: "shrimp-taco",                  name: "Shrimp Taco",                     price: 15.99, category: "Tacos" },
 
-  { id: "fish-ribs",          name: "Fish Ribs",              price: 17.99, category: "Combos" },
-  { id: "chilli-chicken",     name: "Chilli Chicken",         price: 17.99, category: "Combos" },
-  { id: "chicken-65",         name: "Chicken 65",             price: 17.99, category: "Combos" },
+  // Mains
+  { id: "paneer-butter-masala",         name: "Paneer Butter Masala",            price: 18.00, category: "Mains" },
+  { id: "paneer-tikka-masala",          name: "Paneer Tikka Masala",             price: 19.00, category: "Mains" },
+  { id: "butter-chicken",               name: "Butter Chicken",                  price: 21.49, category: "Mains" },
+  { id: "chicken-tikka-masala",         name: "Chicken Tikka Masala",            price: 21.49, category: "Mains" },
+  { id: "dal-makhani",                  name: "Dal Makhani",                     price: 21.99, category: "Mains" },
 
-  { id: "jeera-rice",         name: "Jeera Rice",             price: 6.99,  category: "Rice & Pasta" },
-  { id: "plain-rice",         name: "Plain Rice",             price: 5.99,  category: "Rice & Pasta" },
+  // Rice
+  { id: "veg-fried-rice",               name: "Veg Fried Rice",                  price: 17.99, category: "Rice" },
+  { id: "egg-fried-rice",               name: "Egg Fried Rice",                  price: 19.99, category: "Rice" },
+  { id: "thai-basil-chicken-fried-rice",name: "Thai Basil Chicken Fried Rice",   price: 21.99, category: "Rice" },
 
-  { id: "white-pasta-paneer", name: "White Sauce Pasta (Paneer)", price: 15.99, category: "Rice & Pasta" },
-  { id: "red-pasta-paneer",   name: "Red Sauce Pasta (Paneer)",   price: 15.99, category: "Rice & Pasta" },
-  { id: "white-pasta-chicken",name: "White Sauce Pasta (Chicken)",price: 15.99, category: "Rice & Pasta" },
-  { id: "red-pasta-chicken",  name: "Red Sauce Pasta (Chicken)",  price: 15.99, category: "Rice & Pasta" },
+  // Breads
+  { id: "plain-naan",                   name: "Plain Naan",                      price: 5.00,  category: "Breads" },
+  { id: "butter-naan",                  name: "Butter Naan",                     price: 7.00,  category: "Breads" },
+  { id: "garlic-naan",                  name: "Garlic Naan",                     price: 7.49,  category: "Breads" },
+  { id: "cheese-naan",                  name: "Cheese Naan",                     price: 8.49,  category: "Breads" },
+  { id: "cheese-garlic-naan",           name: "Cheese Garlic Naan",              price: 8.49,  category: "Breads" },
 
-  { id: "pizza-veg",          name: "Indian Style Pizza (Veg)",   price: 14.99, category: "Pizza" },
-  { id: "pizza-nonveg",       name: "Indian Style Pizza (Non-Veg)", price: 14.99, category: "Pizza" },
+  // Trimmings
+  { id: "plain-rice",                   name: "Plain Rice",                      price: 6.00,  category: "Trimmings" },
+  { id: "jeera-rice",                   name: "Jeera Rice",                      price: 7.00,  category: "Trimmings" },
+  { id: "saffron-rice",                 name: "Saffron Rice",                    price: 9.00,  category: "Trimmings" },
 
-  // Sandwiches
-  { id: "veg-sandwich",       name: "Vegetable Sandwich (Non-grilled)", price: 10.99, category: "Sandwich" },
-  { id: "veg-sandwich-grill", name: "Vegetable Sandwich (Grilled)",     price: 12.99, category: "Sandwich" },
-  { id: "cheese-chutney-sand",name: "Cheese Chutney Sandwich",         price: 10.99, category: "Sandwich" },
-  { id: "pita-sandwich",      name: "Pita Sandwich (Chicken or Paneer)",price: 15.99, category: "Sandwich" },
-  { id: "paneer-tikka-bread", name: "Paneer Tikka with Bread",          price: 19.99, category: "Sandwich" },
-  { id: "chicken-tikka-bread",name: "Chicken Tikka with Bread",         price: 19.99, category: "Sandwich" },
+  // Desserts
+  { id: "nests-gulab-jamun",            name: "Nests Gulab Jamun",               price: 14.99, category: "Desserts" },
+  { id: "ny-cheesecake",                name: "New York Cheesecake",             price: 14.99, category: "Desserts" },
+  { id: "pistachio-tiramisu",           name: "Pistachio Tiramisu",              price: 15.90, category: "Desserts" },
 
-  // Sweets & snacks
-  { id: "gulab-jamun",        name: "2pcs Gulab Jammun",      price: 4.99,  category: "Sweet & Snacks" },
-  { id: "samosa-snack",       name: "Samosa",                 price: 3.99,  category: "Sweet & Snacks" },
-  { id: "bun-maska",          name: "Bun Maska",              price: 2.99,  category: "Sweet & Snacks" },
-  { id: "pav-bhaji",          name: "Pav Bhaji",              price: 14.99, category: "Sweet & Snacks" },
-  { id: "chole-kulcha",       name: "Chole Kulcha",           price: 15.99, category: "Sweet & Snacks" }
+  // Signature Mocktails
+  { id: "cucumber-elderflower-cooler",  name: "Cucumber, Elderflower & White Pepper Cooler", price: 13.50, category: "Signature Mocktails" },
+  { id: "kiwi-basil-verde-spritz",      name: "Kiwi & Basil Verde Spritz",       price: 13.50, category: "Signature Mocktails" },
+  { id: "watermelon-black-pepper-cooler", name: "Watermelon & Black Pepper Cooler", price: 14.00, category: "Signature Mocktails" },
+  { id: "banana-honey-highball",        name: "Banana & Honey Highball",         price: 16.00, category: "Signature Mocktails" },
+  { id: "burnt-orange-honey-tonic",     name: "Burnt Orange & Honey Tonic",      price: 15.50, category: "Signature Mocktails" },
+  { id: "cranberry-basil-smoked-salt-spritz", name: "Cranberry, Basil & Smoked Salt Spritz", price: 15.00, category: "Signature Mocktails" },
 ];
-
 
 
 
@@ -400,7 +434,7 @@ const formatPrice = value => "$" + value.toFixed(2);
 function renderOrderMenu() {
   if (!orderMenuContainer) return;
 
-  const categories = Array.from(new Set(backbencherMenu.map(item => item.category)));
+  const categories = Array.from(new Set(valentinoMenu.map(item => item.category)));
   const fragment = document.createDocumentFragment();
 
   categories.forEach(category => {
@@ -415,7 +449,7 @@ function renderOrderMenu() {
     const list = document.createElement("ul");
     list.className = "order-menu-list";
 
-    backbencherMenu
+    valentinoMenu
       .filter(item => item.category === category)
       .forEach(item => {
         const li = document.createElement("li");
@@ -530,7 +564,7 @@ function renderCart() {
 }
 
 function addToCart(itemId) {
-  const item = backbencherMenu.find(m => m.id === itemId);
+  const item = valentinoMenu.find(m => m.id === itemId);
   if (!item) return;
 
   const existing = orderCart.get(itemId);
@@ -597,7 +631,7 @@ if (orderForm) {
     });
 
     const summary =
-      `BackBencher order from ${name}\n` +
+      `Valentino Restro & Bar order from ${name}\n` +
       (phone ? `Phone: ${phone}\n` : "") +
       `\nItems:\n${lines.join("\n")}\n\nTotal: ${formatPrice(total)}\n\nNotes:\n${notes || "-"}`;
 
@@ -606,8 +640,8 @@ if (orderForm) {
 
     // Send via default mail client (front-end only, no backend needed)
     const mailto =
-      "mailto:tbbencher@gmail.com" +
-      "?subject=" + encodeURIComponent("BackBencher order from " + name) +
+      "mailto:atvalentinoo@gmail.com" +
+      "?subject=" + encodeURIComponent("Valentino order from " + name) +
       "&body=" + encodeURIComponent(summary);
 
     window.location.href = mailto;
