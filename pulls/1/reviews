@@ -1,0 +1,11 @@
+### Review Comment
+
+I would like to suggest switching from the current iframe implementation to a pinned-version PDF.js continuous-scroll canvas viewer. This change would improve performance and flexibility in managing PDFs. 
+
+**Security Requirements:**
+- Use HTTPS pinned CDN for loading PDF.js.
+- Ensure that `workerSrc` is set to a pinned version to avoid potential security risks.
+- Avoid using `innerHTML` injection to mitigate XSS vulnerabilities.
+- Add `rel="noopener noreferrer"` to any links opening in a new tab to enhance security.
+
+Additionally, please maintain the current overlay open/close behavior to ensure a smooth user experience.
