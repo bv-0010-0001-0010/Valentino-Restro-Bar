@@ -657,3 +657,138 @@ if (orderForm) {
 /* initial render */
 renderOrderMenu();
 renderCart();
+
+
+
+/**
+ * PDF.js CONTINUOUS SCROLL VIEWER
+ * Renders all pages as stacked canvases; lazy-loads when overlay opens.
+ */
+(function () {
+  'use strict';
+
+  if (typeof pdfjsLib === 'undefined') return;
+
+  const viewer      = document.querySelector('.pdf-viewer');
+  const scrollEl    = document.getElementById('pdf-scroll');
+  const fallbackEl  = document.getElementById('pdf-fallback');
+  const zoomInBtn   = document.getElementById('pdf-zoom-in');
+  const zoomOutBtn  = document.getElementById('pdf-zoom-out');
+  const currPageEl  = document.getElementById('pdf-current-page');
+  const totalPagesEl = document.getElementById('pdf-total-pages');
+
+  if (!viewer || !scrollEl) return;
+
+  const PDF_SRC    = viewer.dataset.pdfSrc || './assets/doc/ValentinoRestro&BarMenu.pdf';
+  const menuOverlayEl = document.querySelector('[data-menu-overlay]');
+  const DPR     = window.devicePixelRatio || 1;
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3.0;
+  const SCALE_STEP = 0.25;
+
+  let pdfDoc    = null;
+  let scale     = 1.0;
+  let rendered  = false;
+  let rendering = false;
+  let resizeTimer;
+
+  function getContainerWidth() {
+    return (scrollEl.clientWidth || 600) - 16;
+  }
+
+  async function renderAllPages() {
+    if (!pdfDoc || rendering) return;
+    rendering = true;
+    scrollEl.innerHTML = '';
+
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+      const page = await pdfDoc.getPage(i);
+      const baseViewport = page.getViewport({ scale: 1.0 });
+      const fitScale = (getContainerWidth() / baseViewport.width) * scale;
+      const scaledViewport = page.getViewport({ scale: fitScale * DPR });
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pdf-page';
+      wrapper.dataset.pageNum = String(i);
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+      canvas.style.width  = Math.floor(scaledViewport.width  / DPR) + 'px';
+      canvas.style.height = Math.floor(scaledViewport.height / DPR) + 'px';
+
+      wrapper.appendChild(canvas);
+      scrollEl.appendChild(wrapper);
+
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: scaledViewport }).promise;
+    }
+
+    if (totalPagesEl) totalPagesEl.textContent = String(pdfDoc.numPages);
+    rendered  = true;
+    rendering = false;
+    updateCurrentPage();
+  }
+
+  function updateCurrentPage() {
+    if (!pdfDoc) return;
+    const pages = scrollEl.querySelectorAll('.pdf-page');
+    let current = 1;
+    const mid = scrollEl.scrollTop + scrollEl.clientHeight / 2;
+    pages.forEach(function (p) {
+      if (p.offsetTop <= mid) {
+        current = parseInt(p.dataset.pageNum, 10);
+      }
+    });
+    if (currPageEl) currPageEl.textContent = String(current);
+  }
+
+  async function loadPDF() {
+    try {
+      pdfDoc = await pdfjsLib.getDocument(PDF_SRC).promise;
+      await renderAllPages();
+    } catch (err) {
+      console.error('PDF viewer error:', err);
+      if (fallbackEl) fallbackEl.hidden = false;
+      if (scrollEl)   scrollEl.hidden   = true;
+    }
+  }
+
+  /* Zoom controls */
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', function () {
+      scale = Math.min(scale + SCALE_STEP, MAX_SCALE);
+      if (pdfDoc) renderAllPages();
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', function () {
+      scale = Math.max(scale - SCALE_STEP, MIN_SCALE);
+      if (pdfDoc) renderAllPages();
+    });
+  }
+
+  /* Page counter on scroll */
+  scrollEl.addEventListener('scroll', updateCurrentPage);
+
+  /* Re-render on window resize (debounced) */
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (rendered && pdfDoc && menuOverlayEl && menuOverlayEl.classList.contains('active')) {
+        renderAllPages();
+      }
+    }, 300);
+  });
+
+  /* Lazy-load: render only when the menu overlay first becomes active */
+  if (menuOverlayEl) {
+    new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.target.classList.contains('active') && !rendered && !rendering) {
+          loadPDF();
+        }
+      });
+    }).observe(menuOverlayEl, { attributes: true, attributeFilter: ['class'] });
+  }
+}());

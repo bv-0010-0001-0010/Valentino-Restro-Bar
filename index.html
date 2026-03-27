@@ -1192,17 +1192,31 @@
       </div>
 
       <div class="menu-overlay-content">
-        <object
-          data="./assets/doc/ValentinoRestro&BarMenu.pdf"
-          type="application/pdf"
-          class="menu-pdf">
-          <p class="body-4">
-            Your browser can't show PDFs inline.
-            <a href="./assets/doc/ValentinoRestro&BarMenu.pdf" class="btn-text hover-underline label-2">
-              Download the menu
-            </a>
-          </p>
-        </object>
+        <div class="pdf-viewer" data-pdf-src="./assets/doc/ValentinoRestro&BarMenu.pdf">
+
+          <div class="pdf-toolbar">
+            <div class="pdf-toolbar-left">
+              <button type="button" class="pdf-btn" id="pdf-zoom-out" aria-label="Zoom out">&#8722;</button>
+              <button type="button" class="pdf-btn" id="pdf-zoom-in" aria-label="Zoom in">&#43;</button>
+            </div>
+            <div class="pdf-toolbar-center">
+              <span class="pdf-page-info">Page <span id="pdf-current-page">&#8212;</span> of <span id="pdf-total-pages">&#8212;</span></span>
+            </div>
+            <div class="pdf-toolbar-right">
+              <a href="./assets/doc/ValentinoRestro&BarMenu.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open or download menu PDF in new tab" class="pdf-btn pdf-btn-text">Open / Download</a>
+            </div>
+          </div>
+
+          <div class="pdf-scroll" id="pdf-scroll">
+            <!-- PDF pages rendered here by PDF.js -->
+          </div>
+
+          <div class="pdf-fallback" id="pdf-fallback" hidden>
+            <p class="body-4">Unable to display the menu PDF.</p>
+            <a href="./assets/doc/ValentinoRestro&BarMenu.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open or download menu PDF in new tab" class="btn-text hover-underline label-2">Open / Download the menu</a>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -1289,6 +1303,16 @@
 
 
 
+
+  <!-- 
+    - PDF.js v3.11.174 (local copy) for continuous-scroll menu viewer
+  -->
+  <script src="./assets/js/pdf.min.js"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = './assets/js/pdf.worker.min.js';
+    }
+  </script>
 
   <!-- 
     - custom js link
