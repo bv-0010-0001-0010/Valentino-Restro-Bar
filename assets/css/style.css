@@ -2577,6 +2577,14 @@ textarea.input-field {
 .menu-overlay .menu-pdf {
   width: 100%;
   height: 100%;
+  border: none;
+  display: block;
+}
+
+.menu-overlay-content .pdf-fallback {
+  text-align: center;
+  margin-block-start: 8px;
+  color: var(--white-alpha-60, rgba(255, 255, 255, 0.6));
 }
 
 /* ORDERING LAYOUT */
