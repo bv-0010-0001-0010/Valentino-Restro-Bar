@@ -792,3 +792,267 @@ renderCart();
     }).observe(menuOverlayEl, { attributes: true, attributeFilter: ['class'] });
   }
 }());
+
+
+
+/**
+ * RESERVATIONS – FULL CRUD
+ * Storage: localStorage  (key: "valentino_reservations")
+ * Supports: Create, Read, Update, Delete
+ */
+(function () {
+  'use strict';
+
+  /* ── DOM refs ─────────────────────────────────────────────────── */
+  const form          = document.getElementById('reservation-form');
+  const nameInput     = document.getElementById('res-name');
+  const phoneInput    = document.getElementById('res-phone');
+  const personsInput  = document.getElementById('res-persons');
+  const dateInput     = document.getElementById('res-date');
+  const timeInput     = document.getElementById('res-time');
+  const messageInput  = document.getElementById('res-message');
+  const editIdInput   = document.getElementById('res-edit-id');
+  const submitBtn     = document.getElementById('res-submit-btn');
+  const cancelEditBtn = document.getElementById('res-cancel-edit-btn');
+  const formTitle     = document.getElementById('res-form-title');
+  const formSubtitle  = document.getElementById('res-form-subtitle');
+
+  const resOverlay    = document.querySelector('[data-res-overlay]');
+  const resCloseBtn   = document.querySelector('[data-res-close]');
+  const resViewBtn    = document.getElementById('res-view-btn');
+
+  const resList       = document.getElementById('res-list');
+  const resEmpty      = document.getElementById('res-empty');
+  const toastEl       = document.getElementById('res-toast');
+
+  if (!form) return;
+
+  /* Read initial label text from the DOM so JS stays in sync with HTML */
+  const INITIAL_TITLE    = formTitle    ? formTitle.textContent.trim()    : 'Reserve Your Seats';
+  const INITIAL_SUBTITLE = formSubtitle ? formSubtitle.textContent.trim() : "Let's Begin!";
+  const INITIAL_BTN_TEXT = (submitBtn && submitBtn.querySelector('.text.text-1'))
+    ? submitBtn.querySelector('.text.text-1').textContent.trim()
+    : 'Book Us In';
+
+  /* ── localStorage helpers ─────────────────────────────────────── */
+  const STORAGE_KEY = 'valentino_reservations';
+
+  function loadAll() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveAll(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  /* ── CRUD ─────────────────────────────────────────────────────── */
+  function createReservation(data) {
+    const list = loadAll();
+    const entry = Object.assign({}, data, {
+      id: (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+      createdAt: new Date().toISOString()
+    });
+    list.push(entry);
+    saveAll(list);
+    return entry;
+  }
+
+  function readReservations() {
+    return loadAll();
+  }
+
+  function updateReservation(id, data) {
+    const list = loadAll();
+    const idx  = list.findIndex(function (r) { return r.id === id; });
+    if (idx === -1) return null;
+    list[idx] = Object.assign({}, list[idx], data);
+    saveAll(list);
+    return list[idx];
+  }
+
+  function deleteReservation(id) {
+    const list = loadAll().filter(function (r) { return r.id !== id; });
+    saveAll(list);
+  }
+
+  /* ── Toast ────────────────────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('show');
+      setTimeout(function () { toastEl.hidden = true; }, 320);
+    }, 3000);
+  }
+
+  /* ── Render list ──────────────────────────────────────────────── */
+  function renderList() {
+    if (!resList) return;
+    const list = readReservations();
+    resList.innerHTML = '';
+
+    if (list.length === 0) {
+      if (resEmpty) resEmpty.hidden = false;
+      return;
+    }
+    if (resEmpty) resEmpty.hidden = true;
+
+    list.forEach(function (r) {
+      const li = document.createElement('li');
+      li.className = 'res-card';
+      li.dataset.resId = r.id;
+
+      const dateFormatted = r.date
+        ? new Date(r.date + 'T00:00:00').toLocaleDateString(navigator.language || 'en-AU', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })
+        : '—';
+
+      li.innerHTML =
+        '<div class="res-card-info">' +
+          '<p class="res-card-name">' + escapeHtml(r.name) + '</p>' +
+          '<p class="res-card-detail">' +
+            dateFormatted + ' &middot; ' + escapeHtml(r.time) +
+            ' &middot; ' + escapeHtml(r.persons) + (parseInt(r.persons, 10) === 1 ? ' person' : ' people') +
+            (r.phone ? ' &middot; ' + escapeHtml(r.phone) : '') +
+          '</p>' +
+          (r.message ? '<p class="res-card-message">' + escapeHtml(r.message) + '</p>' : '') +
+        '</div>' +
+        '<div class="res-card-actions">' +
+          '<button type="button" class="res-card-btn edit" data-edit-id="' + r.id + '" aria-label="Edit reservation for ' + escapeHtml(r.name) + '">Edit</button>' +
+          '<button type="button" class="res-card-btn delete" data-delete-id="' + r.id + '" aria-label="Delete reservation for ' + escapeHtml(r.name) + '">Delete</button>' +
+        '</div>';
+
+      resList.appendChild(li);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── Form helpers ─────────────────────────────────────────────── */
+  function resetForm() {
+    form.reset();
+    editIdInput.value = '';
+    if (formTitle)     formTitle.textContent    = INITIAL_TITLE;
+    if (formSubtitle)  formSubtitle.textContent = INITIAL_SUBTITLE;
+    if (submitBtn) {
+      submitBtn.querySelector('.text.text-1').textContent = INITIAL_BTN_TEXT;
+      submitBtn.querySelector('.text.text-2').textContent = INITIAL_BTN_TEXT;
+    }
+    if (cancelEditBtn) cancelEditBtn.hidden = true;
+  }
+
+  function populateFormForEdit(r) {
+    if (nameInput)    nameInput.value    = r.name    || '';
+    if (phoneInput)   phoneInput.value   = r.phone   || '';
+    if (personsInput) personsInput.value = r.persons || '1';
+    if (dateInput)    dateInput.value    = r.date    || '';
+    if (timeInput)    timeInput.value    = r.time    || '10:00 am';
+    if (messageInput) messageInput.value = r.message || '';
+    if (editIdInput)  editIdInput.value  = r.id;
+
+    if (formTitle)    formTitle.textContent    = 'Edit Reservation';
+    if (formSubtitle) formSubtitle.textContent = 'Update the details below';
+    if (submitBtn) {
+      submitBtn.querySelector('.text.text-1').textContent = 'Save Changes';
+      submitBtn.querySelector('.text.text-2').textContent = 'Save Changes';
+    }
+    if (cancelEditBtn) cancelEditBtn.hidden = false;
+
+    // Scroll to form
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* ── Form submit (Create / Update) ───────────────────────────── */
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const data = {
+      name:    (nameInput    ? nameInput.value.trim()    : ''),
+      phone:   (phoneInput   ? phoneInput.value.trim()   : ''),
+      persons: (personsInput ? personsInput.value        : '1'),
+      date:    (dateInput    ? dateInput.value           : ''),
+      time:    (timeInput    ? timeInput.value           : ''),
+      message: (messageInput ? messageInput.value.trim() : '')
+    };
+
+    const editId = editIdInput ? editIdInput.value.trim() : '';
+
+    if (editId) {
+      updateReservation(editId, data);
+      showToast('Reservation updated!');
+    } else {
+      createReservation(data);
+      showToast('Reservation saved!');
+    }
+
+    resetForm();
+    renderList();
+  });
+
+  /* ── Cancel edit ──────────────────────────────────────────────── */
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener('click', resetForm);
+  }
+
+  /* ── Overlay open / close ─────────────────────────────────────── */
+  if (resViewBtn && resOverlay) {
+    resViewBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      renderList();
+      resOverlay.classList.add('active');
+      document.body.classList.add('res-open');
+      resOverlay.setAttribute('aria-hidden', 'false');
+    });
+  }
+
+  if (resCloseBtn && resOverlay) {
+    resCloseBtn.addEventListener('click', function () {
+      resOverlay.classList.remove('active');
+      document.body.classList.remove('res-open');
+      resOverlay.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  /* ── Delegated edit / delete on the list ─────────────────────── */
+  if (resList) {
+    resList.addEventListener('click', function (e) {
+      const editBtn   = e.target.closest('[data-edit-id]');
+      const deleteBtn = e.target.closest('[data-delete-id]');
+
+      if (editBtn) {
+        const id = editBtn.dataset.editId;
+        const list = readReservations();
+        const res  = list.find(function (r) { return r.id === id; });
+        if (!res) return;
+
+        // Close overlay, populate form
+        resOverlay.classList.remove('active');
+        document.body.classList.remove('res-open');
+        resOverlay.setAttribute('aria-hidden', 'true');
+        populateFormForEdit(res);
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.deleteId;
+        if (!window.confirm('Delete this reservation?')) return;
+        deleteReservation(id);
+        showToast('Reservation deleted.');
+        renderList();
+      }
+    });
+  }
+
+}());

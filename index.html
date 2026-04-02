@@ -776,19 +776,22 @@
 
           <div class="form reservation-form bg-black-10">
 
-            <form action="" class="form-left">
+            <form action="" class="form-left" id="reservation-form" data-reservation-form>
 
-              <h2 class="headline-1 text-center">Reserve Your Seats</h2>
+              <h2 class="headline-1 text-center" id="res-form-title">Reserve Your Seats</h2>
 
-              <p class="form-text text-center">
+              <p class="form-text text-center" id="res-form-subtitle">
                 Let's Begin!
               </p>
 
+              <!-- hidden field to hold the ID when editing -->
+              <input type="hidden" id="res-edit-id" name="editId">
+
               <div class="input-wrapper">
 
-                <input type="text" name="name" placeholder="Your Name" autocomplete="off" class="input-field" aria-label="Your name">
+                <input type="text" name="name" id="res-name" placeholder="Your Name" autocomplete="off" class="input-field" aria-label="Your name" required>
 
-                <input type="tel" name="phone" placeholder="Phone Number" autocomplete="off" class="input-field" aria-label="Phone number">
+                <input type="tel" name="phone" id="res-phone" placeholder="Phone Number" autocomplete="off" class="input-field" aria-label="Phone number">
 
               </div>
 
@@ -797,14 +800,14 @@
                 <div class="icon-wrapper">
                   <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                  <select name="person" class="input-field" aria-label="Number of people">
-                    <option value="1-person">1 Person</option>
-                    <option value="2-person">2 Person</option>
-                    <option value="3-person">3 Person</option>
-                    <option value="4-person">4 Person</option>
-                    <option value="5-person">5 Person</option>
-                    <option value="6-person">6 Person</option>
-                    <option value="7-person">7 Person</option>
+                  <select name="person" id="res-persons" class="input-field" aria-label="Number of people">
+                    <option value="1">1 Person</option>
+                    <option value="2">2 Person</option>
+                    <option value="3">3 Person</option>
+                    <option value="4">4 Person</option>
+                    <option value="5">5 Person</option>
+                    <option value="6">6 Person</option>
+                    <option value="7">7 Person</option>
                   </select>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
@@ -813,7 +816,7 @@
                 <div class="icon-wrapper">
                   <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
 
-                  <input type="date" name="reservation-date" class="input-field" aria-label="Reservation date">
+                  <input type="date" name="reservation-date" id="res-date" class="input-field" aria-label="Reservation date" required>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                 </div>
@@ -821,19 +824,19 @@
                 <div class="icon-wrapper">
                   <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
 
-                  <select name="person" class="input-field" aria-label="Preferred time">
-                    <option value="7:00am">10 : 00 am</option>
-                    <option value="08:00am">11 : 00 am</option>
-                    <option value="09:00am">12 : 00 pm</option>
-                    <option value="10:00am">01 : 00 pm</option>
-                    <option value="11:00am">02 : 00 pm</option>
-                    <option value="012:00am">03 : 00 pm</option>
-                    <option value="01:00pm">04 : 00 pm</option>
-                    <option value="02:00pm">05 : 00 pm</option>
-                    <option value="03:00pm">06 : 00 pm</option>
-                    <option value="04:00pm">07 : 00 pm</option>
-                    <option value="05:00pm">08 : 00 pm</option>
-                    <option value="06:00pm">09 : 00 pm</option>
+                  <select name="time" id="res-time" class="input-field" aria-label="Preferred time">
+                    <option value="10:00 am">10 : 00 am</option>
+                    <option value="11:00 am">11 : 00 am</option>
+                    <option value="12:00 pm">12 : 00 pm</option>
+                    <option value="01:00 pm">01 : 00 pm</option>
+                    <option value="02:00 pm">02 : 00 pm</option>
+                    <option value="03:00 pm">03 : 00 pm</option>
+                    <option value="04:00 pm">04 : 00 pm</option>
+                    <option value="05:00 pm">05 : 00 pm</option>
+                    <option value="06:00 pm">06 : 00 pm</option>
+                    <option value="07:00 pm">07 : 00 pm</option>
+                    <option value="08:00 pm">08 : 00 pm</option>
+                    <option value="09:00 pm">09 : 00 pm</option>
                   </select>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
@@ -841,13 +844,25 @@
 
               </div>
 
-              <textarea name="message" placeholder="Message" autocomplete="off" class="input-field" aria-label="Message"></textarea>
+              <textarea name="message" id="res-message" placeholder="Message" autocomplete="off" class="input-field" aria-label="Message"></textarea>
 
-              <button type="submit" class="btn btn-secondary">
-                <span class="text text-1">Book Us In</span>
+              <div class="res-form-actions">
+                <button type="submit" class="btn btn-secondary" id="res-submit-btn">
+                  <span class="text text-1">Book Us In</span>
+                  <span class="text text-2" aria-hidden="true">Book Us In</span>
+                </button>
 
-                <span class="text text-2" aria-hidden="true">Book Us In</span>
-              </button>
+                <button type="button" class="btn btn-secondary" id="res-cancel-edit-btn" aria-label="Cancel editing reservation" hidden>
+                  <span class="text text-1">Cancel Edit</span>
+                  <span class="text text-2" aria-hidden="true">Cancel Edit</span>
+                </button>
+              </div>
+
+              <div class="res-my-bookings-row">
+                <button type="button" class="btn-text hover-underline label-2" id="res-view-btn" data-res-view-open>
+                  My Reservations
+                </button>
+              </div>
 
             </form>
 
@@ -1222,6 +1237,30 @@
     </div>
   </section>
 
+  <!-- RESERVATIONS OVERLAY -->
+  <section class="res-overlay" data-res-overlay aria-hidden="true">
+    <div class="res-overlay-inner container">
+
+      <div class="res-overlay-header">
+        <h2 class="headline-1">My Reservations</h2>
+        <button type="button" class="btn btn-secondary" data-res-close>
+          <span class="text text-1">Back</span>
+          <span class="text text-2" aria-hidden="true">Back</span>
+        </button>
+      </div>
+
+      <div class="res-overlay-content">
+        <ul class="res-list" id="res-list" aria-live="polite">
+          <!-- Reservation cards rendered by JS -->
+        </ul>
+        <p class="res-empty body-4" id="res-empty" hidden>
+          No reservations yet. Use the form to make your first booking!
+        </p>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ORDERING OVERLAY -->
   <section class="order-overlay" data-order-overlay aria-hidden="true">
     <div class="order-overlay-inner container">
@@ -1319,7 +1358,10 @@
   -->
   <script src="./assets/js/script.js"></script>
 
-  <!-- 
+    <!-- Toast notification container -->
+  <div class="res-toast" id="res-toast" role="status" aria-live="polite" hidden></div>
+
+<!-- 
     - ionicon link
   -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>

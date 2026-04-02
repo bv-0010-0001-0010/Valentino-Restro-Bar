@@ -2666,6 +2666,165 @@ textarea.input-field {
   flex-shrink: 0;
 }
 
+/* ---- RESERVATIONS OVERLAY ---- */
+
+.res-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--black-alpha-80);
+  z-index: 20;
+  display: none;
+}
+
+.res-overlay.active {
+  display: block;
+}
+
+.res-overlay-inner {
+  height: 100%;
+  padding-block: 96px 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.res-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block-end: 16px;
+  flex-shrink: 0;
+}
+
+.res-overlay-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-24);
+  border: 1px solid var(--white-alpha-10);
+  background-color: var(--smoky-black-2);
+  padding: 16px;
+}
+
+/* Reservation card list */
+
+.res-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.res-card {
+  background-color: var(--eerie-black-2);
+  border: 1px solid var(--white-alpha-10);
+  border-radius: var(--radius-8);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.res-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.res-card-name {
+  font-family: var(--fontFamily-forum);
+  font-size: var(--fontSize-title-1);
+  color: var(--valentino-cream);
+  margin-block-end: 4px;
+}
+
+.res-card-detail {
+  font-size: var(--fontSize-body-4);
+  color: var(--quick-silver);
+  line-height: var(--lineHeight-5);
+}
+
+.res-card-message {
+  font-size: var(--fontSize-body-4);
+  color: var(--white-alpha-20, rgba(255,255,255,0.2));
+  margin-block-start: 6px;
+  font-style: italic;
+}
+
+.res-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.res-card-btn {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
+  color: var(--white);
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+}
+
+.res-card-btn:hover {
+  background: var(--valentino-red);
+  border-color: var(--valentino-red);
+}
+
+.res-card-btn.edit {
+  color: var(--valentino-cream);
+}
+
+.res-card-btn.delete {
+  color: hsl(3, 75%, 70%);
+}
+
+.res-empty {
+  text-align: center;
+  color: var(--quick-silver);
+  padding: 32px 0;
+}
+
+/* Reservation form extras */
+
+.res-form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-block-end: 12px;
+}
+
+.res-my-bookings-row {
+  text-align: center;
+}
+
+/* Toast notification */
+
+.res-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--eerie-black-2);
+  border: 1px solid var(--valentino-cream);
+  color: var(--valentino-cream);
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-8);
+  z-index: 99;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.res-toast.show {
+  opacity: 1;
+}
+
 /* ORDERING LAYOUT */
 
 .order-layout {
