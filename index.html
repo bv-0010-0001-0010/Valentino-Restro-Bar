@@ -776,7 +776,7 @@
 
           <div class="form reservation-form bg-black-10">
 
-            <form action="" class="form-left">
+            <form action="" class="form-left" data-reservation-form>
 
               <h2 class="headline-1 text-center">Reserve Your Seats</h2>
 
@@ -786,9 +786,15 @@
 
               <div class="input-wrapper">
 
-                <input type="text" name="name" placeholder="Your Name" autocomplete="off" class="input-field" aria-label="Your name">
+                <input type="text" name="name" placeholder="Your Name" autocomplete="off" class="input-field" aria-label="Your name" required>
 
                 <input type="tel" name="phone" placeholder="Phone Number" autocomplete="off" class="input-field" aria-label="Phone number">
+
+              </div>
+
+              <div class="input-wrapper">
+
+                <input type="email" name="email" placeholder="Your Email" autocomplete="email" class="input-field" aria-label="Your email" required>
 
               </div>
 
@@ -821,7 +827,7 @@
                 <div class="icon-wrapper">
                   <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
 
-                  <select name="person" class="input-field" aria-label="Preferred time">
+                  <select name="time" class="input-field" aria-label="Preferred time">
                     <option value="7:00am">10 : 00 am</option>
                     <option value="08:00am">11 : 00 am</option>
                     <option value="09:00am">12 : 00 pm</option>
