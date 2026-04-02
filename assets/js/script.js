@@ -657,3 +657,58 @@ if (orderForm) {
 /* initial render */
 renderOrderMenu();
 renderCart();
+
+
+/* event: Book Reservation */
+const reservationForm = document.querySelector("[data-reservation-form]");
+
+if (reservationForm) {
+  reservationForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const formData = new FormData(reservationForm);
+    const name    = (formData.get("name")             || "").trim();
+    const phone   = (formData.get("phone")            || "").trim();
+    const email   = (formData.get("email")            || "").trim();
+    const guests  =  formData.get("person")           || "";
+    const date    =  formData.get("reservation-date") || "";
+    const time    =  formData.get("time")             || "";
+    const message = (formData.get("message")          || "").trim();
+
+    if (!name) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    if (!email) {
+      alert("Please enter your email address.");
+      return;
+    }
+
+    if (!date) {
+      alert("Please select a reservation date.");
+      return;
+    }
+
+    const body =
+      `Reservation Request — Valentino Restro & Bar\n\n` +
+      `Name:   ${name}\n` +
+      (phone  ? `Phone:  ${phone}\n`  : "") +
+      (email  ? `Email:  ${email}\n`  : "") +
+      `Guests: ${guests}\n` +
+      `Date:   ${date}\n` +
+      `Time:   ${time}\n` +
+      (message ? `\nMessage:\n${message}` : "");
+
+    alert(`Thank you, ${name}! Your reservation request will now open in your email app.`);
+
+    const mailto =
+      "mailto:atvalentinoo@gmail.com" +
+      "?subject=" + encodeURIComponent("Reservation Request from " + name) +
+      "&body="    + encodeURIComponent(body);
+
+    window.location.href = mailto;
+
+    reservationForm.reset();
+  });
+}
