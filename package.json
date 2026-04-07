@@ -1,0 +1,15 @@
+{
+  "name": "valentino-restro-bar",
+  "version": "1.0.0",
+  "description": "Valentino Restro & Bar website",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.3.1"
+  }
+}
