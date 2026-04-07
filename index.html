@@ -776,7 +776,7 @@
 
           <div class="form reservation-form bg-black-10">
 
-            <form action="" class="form-left">
+            <form id="reservationForm" class="form-left">
 
               <h2 class="headline-1 text-center">Reserve Your Seats</h2>
 
@@ -784,56 +784,110 @@
                 Let's Begin!
               </p>
 
-              <div class="input-wrapper">
+              <!-- Error Message Container -->
+              <div id="formError" class="form-error" role="alert" aria-live="assertive" style="display:none; color: #d32f2f; text-align: center; margin-bottom: 15px; font-weight: 500;"></div>
 
-                <input type="text" name="name" placeholder="Your Name" autocomplete="off" class="input-field" aria-label="Your name">
+              <!-- Success Message Container -->
+              <div id="formSuccess" class="form-success" role="status" aria-live="polite" style="display:none; color: #388e3c; text-align: center; margin-bottom: 15px; font-weight: 500;"></div>
 
-                <input type="tel" name="phone" placeholder="Phone Number" autocomplete="off" class="input-field" aria-label="Phone number">
+              <div class="input-wrapper input-two-col">
+
+                <label class="sr-only" for="name">Your Name</label>
+
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  placeholder="Your Name" 
+                  autocomplete="name" 
+                  class="input-field" 
+                  aria-label="Your name"
+                  required>
+
+                <label class="sr-only" for="phone">Phone Number</label>
+
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  name="phone" 
+                  placeholder="Phone Number" 
+                  autocomplete="tel" 
+                  class="input-field" 
+                  aria-label="Phone number"
+                  pattern="[0-9\s\-\+\(\)]+"
+                  required>
 
               </div>
 
-              <div class="input-wrapper">
+              <div class="input-wrapper input-single">
+
+                <label class="sr-only" for="email">Your Email</label>
+
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  placeholder="Your Email" 
+                  autocomplete="email" 
+                  class="input-field" 
+                  aria-label="Your email"
+                  required>
+
+              </div>
+
+              <div class="input-wrapper input-three-col">
 
                 <div class="icon-wrapper">
+                  <label class="sr-only" for="person">Select Guests</label>
                   <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                  <select name="person" class="input-field" aria-label="Number of people">
-                    <option value="1-person">1 Person</option>
-                    <option value="2-person">2 Person</option>
-                    <option value="3-person">3 Person</option>
-                    <option value="4-person">4 Person</option>
-                    <option value="5-person">5 Person</option>
-                    <option value="6-person">6 Person</option>
-                    <option value="7-person">7 Person</option>
+                  <select id="person" name="person" class="input-field" aria-label="Number of people" required>
+                    <option value="">-- Select Guests --</option>
+                    <option value="1">1 Person</option>
+                    <option value="2">2 Person</option>
+                    <option value="3">3 Person</option>
+                    <option value="4">4 Person</option>
+                    <option value="5">5 Person</option>
+                    <option value="6">6 Person</option>
+                    <option value="7">7+ Person</option>
                   </select>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                 </div>
 
                 <div class="icon-wrapper">
+                  <label class="sr-only" for="reservationDate">Reservation Date</label>
                   <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
 
-                  <input type="date" name="reservation-date" class="input-field" aria-label="Reservation date">
+                  <input 
+                    type="date" 
+                    id="reservationDate" 
+                    name="reservation-date" 
+                    class="input-field" 
+                    aria-label="Reservation date"
+                    required>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                 </div>
 
                 <div class="icon-wrapper">
+                  <label class="sr-only" for="reservationTime">Select Time</label>
                   <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
 
-                  <select name="person" class="input-field" aria-label="Preferred time">
-                    <option value="7:00am">10 : 00 am</option>
-                    <option value="08:00am">11 : 00 am</option>
-                    <option value="09:00am">12 : 00 pm</option>
-                    <option value="10:00am">01 : 00 pm</option>
-                    <option value="11:00am">02 : 00 pm</option>
-                    <option value="012:00am">03 : 00 pm</option>
-                    <option value="01:00pm">04 : 00 pm</option>
-                    <option value="02:00pm">05 : 00 pm</option>
-                    <option value="03:00pm">06 : 00 pm</option>
-                    <option value="04:00pm">07 : 00 pm</option>
-                    <option value="05:00pm">08 : 00 pm</option>
-                    <option value="06:00pm">09 : 00 pm</option>
+                  <select id="reservationTime" name="reservation-time" class="input-field" aria-label="Preferred time" required>
+                    <option value="">-- Select Time --</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="01:00 PM">01:00 PM</option>
+                    <option value="02:00 PM">02:00 PM</option>
+                    <option value="03:00 PM">03:00 PM</option>
+                    <option value="04:00 PM">04:00 PM</option>
+                    <option value="05:00 PM">05:00 PM</option>
+                    <option value="06:00 PM">06:00 PM</option>
+                    <option value="07:00 PM">07:00 PM</option>
+                    <option value="08:00 PM">08:00 PM</option>
+                    <option value="09:00 PM">09:00 PM</option>
                   </select>
 
                   <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
@@ -841,11 +895,19 @@
 
               </div>
 
-              <textarea name="message" placeholder="Message" autocomplete="off" class="input-field" aria-label="Message"></textarea>
+              <label class="sr-only" for="message">Message</label>
 
-              <button type="submit" class="btn btn-secondary">
+              <textarea 
+                id="message" 
+                name="message" 
+                placeholder="Message (Optional)" 
+                autocomplete="off" 
+                class="input-field" 
+                aria-label="Message"
+                rows="3"></textarea>
+
+              <button type="submit" class="btn btn-secondary" id="submitBtn">
                 <span class="text text-1">Book Us In</span>
-
                 <span class="text text-2" aria-hidden="true">Book Us In</span>
               </button>
 
@@ -1197,7 +1259,7 @@
           type="application/pdf"
           class="menu-pdf">
           <p class="body-4">
-            Your browser can't show PDFs inline.
+            Please use the download link below.
             <a href="./assets/doc/ValentinoRestro&BarMenu.pdf" class="btn-text hover-underline label-2">
               Download the menu
             </a>
@@ -1289,6 +1351,11 @@
 
 
 
+
+  <!-- 
+    - config (Google Apps Script URL)
+  -->
+  <script src="./assets/js/config.js"></script>
 
   <!-- 
     - custom js link

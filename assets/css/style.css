@@ -477,6 +477,18 @@ body.nav-active { overflow: hidden; }
 
 .w-100 { width: 100%; }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .move-anim { animation: move 5s linear infinite; }
 
 @keyframes move {
@@ -505,7 +517,12 @@ body.nav-active { overflow: hidden; }
 
 .input-field::placeholder { color: inherit; }
 
-.input-field:focus { border-color: var(--gold-crayola); }
+.input-field:focus,
+.input-field:focus-visible {
+  border-color: var(--gold-crayola);
+  outline: 2px solid var(--gold-crayola);
+  outline-offset: 2px;
+}
 
 .icon-wrapper {
   position: relative;
@@ -1457,6 +1474,11 @@ body.nav-active { overflow: hidden; }
 .form-left,
 .form-right { padding: 40px 20px 30px; }
 
+.reservation .form-left > .input-wrapper,
+.reservation .form-left > textarea.input-field {
+  margin-block-end: 20px;
+}
+
 .input-field[type="date"] {
   text-transform: uppercase;
   padding-inline-end: 10px;
@@ -2005,14 +2027,27 @@ textarea.input-field {
    * RESERVATION
    */
 
-  .reservation .input-wrapper {
+  .reservation .input-two-col,
+  .reservation .input-three-col,
+  .reservation .input-single {
     display: grid;
-    grid-template-columns: 1fr 1fr;
     column-gap: 20px;
+    row-gap: 0;
   }
 
-  .reservation .input-wrapper:nth-child(4) {
-    grid-template-columns: repeat(3, 1fr);
+  .reservation .input-two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .reservation .input-three-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .reservation .input-single { grid-template-columns: minmax(0, 1fr); }
+
+  .reservation .input-two-col .input-field,
+  .reservation .input-single .input-field,
+  .reservation .input-three-col .icon-wrapper { margin-block-end: 0; }
+
+  .reservation .form-left > .input-wrapper,
+  .reservation .form-left > textarea.input-field {
+    margin-block-end: 24px;
   }
 
 
@@ -2172,6 +2207,8 @@ textarea.input-field {
     display: grid;
     grid-template-columns: 1fr 0.5fr;
   }
+
+  .reservation .input-three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 
 
