@@ -660,6 +660,16 @@ const googleAppsScriptUrl = typeof window.GOOGLE_APPS_SCRIPT_URL === "string"
   ? window.GOOGLE_APPS_SCRIPT_URL.trim()
   : "";
 
+const setAnimatedButtonLabel = function (button, label) {
+  if (!button) return;
+
+  const primaryText = button.querySelector(".text-1");
+  const secondaryText = button.querySelector(".text-2");
+
+  if (primaryText) primaryText.textContent = label;
+  if (secondaryText) secondaryText.textContent = label;
+};
+
 if (reservationForm) {
   reservationForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -698,9 +708,9 @@ if (reservationForm) {
 
     // Disable submit button to prevent double submission
     const submitBtn = document.getElementById("submitBtn");
-    const originalBtnText = submitBtn.textContent;
+    const originalBtnText = submitBtn.querySelector(".text-1")?.textContent || "Book Us In";
     submitBtn.disabled = true;
-    submitBtn.textContent = "Sending...";
+    setAnimatedButtonLabel(submitBtn, "Sending...");
 
     try {
       if (!googleAppsScriptUrl) {
@@ -761,7 +771,7 @@ if (reservationForm) {
     } finally {
       // Re-enable submit button
       submitBtn.disabled = false;
-      submitBtn.textContent = originalBtnText;
+      setAnimatedButtonLabel(submitBtn, originalBtnText);
     }
   });
 }
