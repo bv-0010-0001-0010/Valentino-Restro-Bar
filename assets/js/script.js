@@ -658,7 +658,9 @@ if (orderForm) {
 const reservationForm = document.getElementById("reservationForm");
 const googleAppsScriptUrl = typeof window.GOOGLE_APPS_SCRIPT_URL === "string"
   ? window.GOOGLE_APPS_SCRIPT_URL.trim()
-  : "";
+  : typeof GOOGLE_APPS_SCRIPT_URL === "string"
+    ? GOOGLE_APPS_SCRIPT_URL.trim()
+    : "";
 
 const setAnimatedButtonLabel = function (button, label) {
   if (!button) return;
@@ -714,23 +716,8 @@ if (reservationForm) {
 
     try {
       if (!googleAppsScriptUrl) {
-        const summary =
-          `Reservation request from ${name}\n` +
-          `Phone: ${phone}\n` +
-          `Email: ${email}\n` +
-          `Guests: ${person}\n` +
-          `Date: ${reservationDate}\n` +
-          `Time: ${reservationTime}\n\n` +
-          `Message:\n${message || "-"}`;
-
-        window.location.href =
-          "mailto:atvalentinoo@gmail.com" +
-          "?subject=" + encodeURIComponent(`Reservation request from ${name}`) +
-          "&body=" + encodeURIComponent(summary);
-
-        formSuccess.textContent = "Your reservation details are ready to send in your email app.";
-        formSuccess.style.display = "block";
-        reservationForm.reset();
+        formError.textContent = "Reservation email service is not configured. Add the deployed Google Apps Script URL in assets/js/config.js.";
+        formError.style.display = "block";
         return;
       }
 
@@ -748,7 +735,19 @@ if (reservationForm) {
         })
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+      let result;
+
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Reservation response parse error:", parseError, responseText);
+        throw new Error("The reservation service returned an unexpected response.");
+      }
+
+      if (!response.ok) {
+        throw new Error(result.message || "The reservation service could not process your request.");
+      }
 
       if (result.status === "success") {
         formSuccess.textContent = result.message;
@@ -766,7 +765,7 @@ if (reservationForm) {
       }
     } catch (error) {
       console.error("Reservation form error:", error);
-      formError.textContent = "Network error. Please check your connection and try again.";
+      formError.textContent = error.message || "Network error. Please check your connection and try again.";
       formError.style.display = "block";
     } finally {
       // Re-enable submit button
