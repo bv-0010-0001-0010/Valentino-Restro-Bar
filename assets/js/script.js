@@ -674,6 +674,7 @@ const LAST_BOOKING_HOUR_24 = Number.isInteger(reservationSettings.lastBookingHou
   ? Number(reservationSettings.lastBookingHour24)
   : 22;
 const BLOCKED_WINDOWS = Array.isArray(reservationSettings.blockedWindows) ? reservationSettings.blockedWindows : [];
+const ENABLE_LIVE_AVAILABILITY = reservationSettings.enableLiveAvailability === true;
 
 const availabilityCache = new Map();
 let availabilityRequestCounter = 0;
@@ -842,6 +843,15 @@ const setSlotStatusMessage = function (message, type) {
 const getSlotAvailability = async function (isoDate, forceRefresh = false) {
   if (!isoDate) return null;
 
+  if (!ENABLE_LIVE_AVAILABILITY) {
+    const localOnly = {
+      capacity: SLOT_CAPACITY,
+      slots: []
+    };
+    availabilityCache.set(isoDate, localOnly);
+    return localOnly;
+  }
+
   if (!forceRefresh && availabilityCache.has(isoDate)) {
     return availabilityCache.get(isoDate);
   }
@@ -910,8 +920,9 @@ const updateTimeSlotOptions = async function (forceRefresh = false) {
   try {
     availabilityData = await getSlotAvailability(selectedDate, forceRefresh);
   } catch (error) {
-    console.error("Slot availability fetch failed:", error);
-    setSlotStatusMessage(error.message || "Unable to fetch slot availability right now.", "error");
+    if (ENABLE_LIVE_AVAILABILITY) {
+      setSlotStatusMessage(error.message || "Unable to fetch slot availability right now.", "error");
+    }
     availabilityData = {
       capacity: SLOT_CAPACITY,
       slots: []
@@ -958,15 +969,8 @@ const updateTimeSlotOptions = async function (forceRefresh = false) {
 
     option.disabled = isSlotClosed || isSoldOut || cannotFitParty;
 
-    if (blockedByWindow) {
-      option.textContent = `${baseLabel} (Blocked)`;
-    } else if (isSoldOut) {
-      option.textContent = `${baseLabel} (Full)`;
-    } else if (cannotFitParty) {
-      option.textContent = `${baseLabel} (${slotInfo.seatsLeft} seats left)`;
-    } else {
-      option.textContent = `${baseLabel} (${slotInfo.seatsLeft} seats left)`;
-    }
+    // Keep slot labels clean on UI; availability state is represented by enabled/disabled only.
+    option.textContent = baseLabel;
 
     if (!option.disabled) {
       hasAvailableSlot = true;

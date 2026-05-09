@@ -7,6 +7,7 @@ window.RESERVATION_SETTINGS = {
 	slotCapacity: 70,
 	openingHour24: 10,
 	lastBookingHour24: 22,
+	enableLiveAvailability: false,
 	blockedWindows: [
 		{
 			scope: "today",
