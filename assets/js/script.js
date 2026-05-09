@@ -656,11 +656,390 @@ if (orderForm) {
 
 /* event: Reservation Form Submission */
 const reservationForm = document.getElementById("reservationForm");
+const reservationDateInput = document.getElementById("reservationDate");
+const reservationTimeSelect = document.getElementById("reservationTime");
+const reservationPersonSelect = document.getElementById("person");
 const googleAppsScriptUrl = typeof window.GOOGLE_APPS_SCRIPT_URL === "string"
   ? window.GOOGLE_APPS_SCRIPT_URL.trim()
   : typeof GOOGLE_APPS_SCRIPT_URL === "string"
     ? GOOGLE_APPS_SCRIPT_URL.trim()
     : "";
+
+const reservationSettings = window.RESERVATION_SETTINGS || {};
+const SLOT_CAPACITY = Number(reservationSettings.slotCapacity) > 0 ? Number(reservationSettings.slotCapacity) : 70;
+const OPENING_HOUR_24 = Number.isInteger(reservationSettings.openingHour24)
+  ? Number(reservationSettings.openingHour24)
+  : 10;
+const LAST_BOOKING_HOUR_24 = Number.isInteger(reservationSettings.lastBookingHour24)
+  ? Number(reservationSettings.lastBookingHour24)
+  : 22;
+const BLOCKED_WINDOWS = Array.isArray(reservationSettings.blockedWindows) ? reservationSettings.blockedWindows : [];
+
+const availabilityCache = new Map();
+let availabilityRequestCounter = 0;
+
+const toIsoDate = function (date) {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().slice(0, 10);
+};
+
+const parseTimeToMinutes = function (timeValue) {
+  if (!timeValue) return null;
+
+  if (/^\d{2}:\d{2}$/.test(timeValue)) {
+    const [hours, minutes] = timeValue.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+
+  const twelveHourMatch = timeValue.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
+  if (!twelveHourMatch) return null;
+
+  let hours = Number(twelveHourMatch[1]);
+  const minutes = Number(twelveHourMatch[2]);
+  const meridiem = twelveHourMatch[3].toUpperCase();
+
+  if (hours === 12) {
+    hours = meridiem === "AM" ? 0 : 12;
+  } else if (meridiem === "PM") {
+    hours += 12;
+  }
+
+  return hours * 60 + minutes;
+};
+
+const normalizeSlotTime = function (timeValue) {
+  const minutes = parseTimeToMinutes(timeValue);
+  if (minutes === null) return "";
+  const hours = Math.floor(minutes / 60).toString().padStart(2, "0");
+  const mins = (minutes % 60).toString().padStart(2, "0");
+  return `${hours}:${mins}`;
+};
+
+const formatTimeLabelFrom24Hour = function (hour24) {
+  const period = hour24 >= 12 ? "PM" : "AM";
+  const twelveHour = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${String(twelveHour).padStart(2, "0")}:00 ${period}`;
+};
+
+const buildSlotCatalog = function () {
+  const slots = [];
+
+  for (let hour = OPENING_HOUR_24; hour <= LAST_BOOKING_HOUR_24; hour++) {
+    slots.push({
+      value: formatTimeLabelFrom24Hour(hour),
+      hhmm: `${String(hour).padStart(2, "0")}:00`
+    });
+  }
+
+  return slots;
+};
+
+const slotCatalog = buildSlotCatalog();
+
+const parseGuestCount = function (personValue) {
+  const parsed = Number(personValue);
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  return 1;
+};
+
+const parseDateParts = function (isoDate) {
+  if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return null;
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return { year, month, day };
+};
+
+const isTodayDate = function (isoDate) {
+  return isoDate === toIsoDate(new Date());
+};
+
+const isSameDate = function (dateA, dateB) {
+  return dateA.year === dateB.year && dateA.month === dateB.month && dateA.day === dateB.day;
+};
+
+const parseBlockedScopeDate = function (scopeValue) {
+  if (!scopeValue || typeof scopeValue !== "string") return null;
+  const trimmed = scopeValue.trim().toLowerCase();
+
+  if (trimmed === "today") return parseDateParts(toIsoDate(new Date()));
+  if (trimmed === "tomorrow") {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return parseDateParts(toIsoDate(tomorrow));
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return parseDateParts(trimmed);
+
+  return null;
+};
+
+const isSlotBlockedByWindow = function (isoDate, hhmm) {
+  const dateParts = parseDateParts(isoDate);
+  if (!dateParts) return false;
+
+  const slotMinutes = parseTimeToMinutes(hhmm);
+  if (slotMinutes === null) return false;
+
+  return BLOCKED_WINDOWS.some((windowRule) => {
+    const ruleDate = parseBlockedScopeDate(windowRule.scope);
+    if (!ruleDate || !isSameDate(dateParts, ruleDate)) return false;
+
+    const startMinutes = parseTimeToMinutes(windowRule.start);
+    const endMinutes = parseTimeToMinutes(windowRule.end);
+    if (startMinutes === null || endMinutes === null) return false;
+
+    return slotMinutes >= startMinutes && slotMinutes <= endMinutes;
+  });
+};
+
+const ensureSlotOptions = function () {
+  if (!reservationTimeSelect) return;
+
+  const selectedValue = reservationTimeSelect.value;
+  reservationTimeSelect.innerHTML = "";
+
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = "Select Time";
+  reservationTimeSelect.appendChild(placeholderOption);
+
+  slotCatalog.forEach((slot) => {
+    const option = document.createElement("option");
+    option.value = slot.value;
+    option.textContent = slot.value;
+    option.dataset.baseLabel = slot.value;
+    option.dataset.hhmm = slot.hhmm;
+    reservationTimeSelect.appendChild(option);
+  });
+
+  const stillExists = Array.from(reservationTimeSelect.options).some((option) => option.value === selectedValue);
+  reservationTimeSelect.value = stillExists ? selectedValue : "";
+};
+
+const setSlotStatusMessage = function (message, type) {
+  const formError = document.getElementById("formError");
+  const formSuccess = document.getElementById("formSuccess");
+
+  if (!formError || !formSuccess) return;
+
+  if (!message) {
+    formError.style.display = "none";
+    return;
+  }
+
+  formSuccess.style.display = "none";
+
+  if (type === "success") {
+    formError.style.display = "none";
+    formSuccess.textContent = message;
+    formSuccess.style.display = "block";
+    return;
+  }
+
+  formError.textContent = message;
+  formError.style.display = "block";
+};
+
+const getSlotAvailability = async function (isoDate, forceRefresh = false) {
+  if (!isoDate) return null;
+
+  if (!forceRefresh && availabilityCache.has(isoDate)) {
+    return availabilityCache.get(isoDate);
+  }
+
+  if (!googleAppsScriptUrl) {
+    const fallback = {
+      capacity: SLOT_CAPACITY,
+      slots: slotCatalog.map((slot) => ({
+        time: slot.value,
+        booked: 0,
+        seatsLeft: SLOT_CAPACITY,
+        isOpen: true,
+        isBlocked: false
+      }))
+    };
+
+    availabilityCache.set(isoDate, fallback);
+    return fallback;
+  }
+
+  const requestId = ++availabilityRequestCounter;
+  const availabilityUrl = `${googleAppsScriptUrl}?action=getAvailability&date=${encodeURIComponent(isoDate)}`;
+  const response = await fetch(availabilityUrl, { method: "GET" });
+  const rawText = await response.text();
+  let payload;
+
+  try {
+    payload = JSON.parse(rawText);
+  } catch (parseError) {
+    throw new Error("Could not read availability response from reservation service.");
+  }
+
+  if (!response.ok || payload.status !== "success") {
+    throw new Error(payload.message || "Unable to fetch slot availability right now.");
+  }
+
+  if (requestId !== availabilityRequestCounter) {
+    return availabilityCache.get(isoDate) || payload.data;
+  }
+
+  const normalized = {
+    capacity: Number(payload.data && payload.data.capacity) > 0 ? Number(payload.data.capacity) : SLOT_CAPACITY,
+    slots: Array.isArray(payload.data && payload.data.slots) ? payload.data.slots : []
+  };
+
+  availabilityCache.set(isoDate, normalized);
+  return normalized;
+};
+
+const updateTimeSlotOptions = async function (forceRefresh = false) {
+  if (!reservationTimeSelect || !reservationDateInput) return;
+
+  const selectedDate = reservationDateInput.value;
+  const guestCount = parseGuestCount(reservationPersonSelect ? reservationPersonSelect.value : "1");
+  const selectedOptionValue = reservationTimeSelect.value;
+
+  ensureSlotOptions();
+
+  if (!selectedDate) {
+    setSlotStatusMessage("Please select your reservation date first.", "error");
+    return;
+  }
+
+  let availabilityData;
+
+  try {
+    availabilityData = await getSlotAvailability(selectedDate, forceRefresh);
+  } catch (error) {
+    console.error("Slot availability fetch failed:", error);
+    setSlotStatusMessage(error.message || "Unable to fetch slot availability right now.", "error");
+    availabilityData = {
+      capacity: SLOT_CAPACITY,
+      slots: []
+    };
+  }
+
+  const slotMap = new Map();
+  availabilityData.slots.forEach((slotEntry) => {
+    const normalizedTime = normalizeSlotTime(slotEntry.time);
+    if (!normalizedTime) return;
+
+    const booked = Number(slotEntry.booked);
+    const seatsLeft = Number.isFinite(Number(slotEntry.seatsLeft))
+      ? Number(slotEntry.seatsLeft)
+      : Math.max(0, availabilityData.capacity - (Number.isFinite(booked) ? booked : 0));
+
+    slotMap.set(normalizedTime, {
+      booked: Number.isFinite(booked) ? booked : 0,
+      seatsLeft: Math.max(0, seatsLeft),
+      isOpen: slotEntry.isOpen !== false,
+      isBlocked: Boolean(slotEntry.isBlocked)
+    });
+  });
+
+  let hasAvailableSlot = false;
+
+  Array.from(reservationTimeSelect.options).forEach((option) => {
+    if (!option.value) return;
+
+    const hhmm = option.dataset.hhmm || normalizeSlotTime(option.value);
+    const baseLabel = option.dataset.baseLabel || option.value;
+    const slotInfo = slotMap.get(hhmm) || {
+      booked: 0,
+      seatsLeft: availabilityData.capacity,
+      isOpen: true,
+      isBlocked: false
+    };
+
+    const blockedByWindow = isSlotBlockedByWindow(selectedDate, hhmm);
+    const isClosedByLastBooking = parseTimeToMinutes(hhmm) > (LAST_BOOKING_HOUR_24 * 60);
+    const isSlotClosed = blockedByWindow || isClosedByLastBooking || slotInfo.isBlocked || !slotInfo.isOpen;
+    const cannotFitParty = slotInfo.seatsLeft < guestCount;
+    const isSoldOut = slotInfo.seatsLeft <= 0;
+
+    option.disabled = isSlotClosed || isSoldOut || cannotFitParty;
+
+    if (blockedByWindow) {
+      option.textContent = `${baseLabel} (Blocked)`;
+    } else if (isSoldOut) {
+      option.textContent = `${baseLabel} (Full)`;
+    } else if (cannotFitParty) {
+      option.textContent = `${baseLabel} (${slotInfo.seatsLeft} seats left)`;
+    } else {
+      option.textContent = `${baseLabel} (${slotInfo.seatsLeft} seats left)`;
+    }
+
+    if (!option.disabled) {
+      hasAvailableSlot = true;
+    }
+  });
+
+  const selectedOptionStillValid = Array.from(reservationTimeSelect.options).some(
+    (option) => option.value === selectedOptionValue && !option.disabled
+  );
+
+  reservationTimeSelect.value = selectedOptionStillValid ? selectedOptionValue : "";
+
+  if (!hasAvailableSlot) {
+    setSlotStatusMessage("Sorry, all slots are full or unavailable for the selected date.", "error");
+  } else {
+    setSlotStatusMessage("", "error");
+  }
+};
+
+const validateCurrentSelection = async function (guestCount, selectedDate, selectedTime) {
+  if (!selectedDate || !selectedTime) {
+    return {
+      valid: false,
+      message: "Please select reservation date and time."
+    };
+  }
+
+  const normalizedTime = normalizeSlotTime(selectedTime);
+  if (!normalizedTime) {
+    return {
+      valid: false,
+      message: "Please select a valid reservation time."
+    };
+  }
+
+  if (isSlotBlockedByWindow(selectedDate, normalizedTime)) {
+    return {
+      valid: false,
+      message: "This slot is blocked for today. Please choose another time."
+    };
+  }
+
+  const availability = await getSlotAvailability(selectedDate, true);
+  const slotEntry = Array.isArray(availability.slots)
+    ? availability.slots.find((slot) => normalizeSlotTime(slot.time) === normalizedTime)
+    : null;
+
+  const booked = slotEntry && Number.isFinite(Number(slotEntry.booked)) ? Number(slotEntry.booked) : 0;
+  const seatsLeft = slotEntry && Number.isFinite(Number(slotEntry.seatsLeft))
+    ? Number(slotEntry.seatsLeft)
+    : Math.max(0, availability.capacity - booked);
+  const isBlocked = Boolean(slotEntry && slotEntry.isBlocked);
+  const isOpen = slotEntry ? slotEntry.isOpen !== false : true;
+
+  if (isBlocked || !isOpen) {
+    return {
+      valid: false,
+      message: "This slot is no longer available. Please select another slot."
+    };
+  }
+
+  if (seatsLeft < guestCount) {
+    return {
+      valid: false,
+      message: "Sorry, all slots are full for this time. Please choose another slot."
+    };
+  }
+
+  return {
+    valid: true,
+    seatsLeft
+  };
+};
 
 const setAnimatedButtonLabel = function (button, label) {
   if (!button) return;
@@ -673,6 +1052,21 @@ const setAnimatedButtonLabel = function (button, label) {
 };
 
 if (reservationForm) {
+  if (reservationDateInput) {
+    reservationDateInput.min = toIsoDate(new Date());
+    reservationDateInput.addEventListener("change", function () {
+      updateTimeSlotOptions(true);
+    });
+  }
+
+  if (reservationPersonSelect) {
+    reservationPersonSelect.addEventListener("change", function () {
+      updateTimeSlotOptions(false);
+    });
+  }
+
+  ensureSlotOptions();
+
   reservationForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -692,6 +1086,7 @@ if (reservationForm) {
     const reservationDate = (formData.get("reservation-date") || "").trim();
     const reservationTime = (formData.get("reservation-time") || "").trim();
     const message = (formData.get("message") || "").trim();
+    const guestCount = parseGuestCount(person);
 
     // Validate required fields
     if (!name || !phone || !email || !person || !reservationDate || !reservationTime) {
@@ -704,6 +1099,60 @@ if (reservationForm) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       formError.textContent = "Please enter a valid email address.";
+      formError.style.display = "block";
+      return;
+    }
+
+    const selectedDateParts = parseDateParts(reservationDate);
+    const todayParts = parseDateParts(toIsoDate(new Date()));
+
+    if (!selectedDateParts || !todayParts) {
+      formError.textContent = "Please choose a valid reservation date.";
+      formError.style.display = "block";
+      return;
+    }
+
+    if (
+      selectedDateParts.year < todayParts.year ||
+      (selectedDateParts.year === todayParts.year && selectedDateParts.month < todayParts.month) ||
+      (selectedDateParts.year === todayParts.year && selectedDateParts.month === todayParts.month && selectedDateParts.day < todayParts.day)
+    ) {
+      formError.textContent = "Past dates are not available for reservation.";
+      formError.style.display = "block";
+      return;
+    }
+
+    const normalizedSelectedTime = normalizeSlotTime(reservationTime);
+    if (!normalizedSelectedTime) {
+      formError.textContent = "Please select a valid reservation time.";
+      formError.style.display = "block";
+      return;
+    }
+
+    const isAfterLastBooking = parseTimeToMinutes(normalizedSelectedTime) > LAST_BOOKING_HOUR_24 * 60;
+    if (isAfterLastBooking) {
+      formError.textContent = "Reservations are closed after 10:00 PM.";
+      formError.style.display = "block";
+      return;
+    }
+
+    if (isTodayDate(reservationDate) && isSlotBlockedByWindow(reservationDate, normalizedSelectedTime)) {
+      formError.textContent = "Bookings are blocked today between 6:00 PM and 9:00 PM.";
+      formError.style.display = "block";
+      return;
+    }
+
+    try {
+      const availabilityValidation = await validateCurrentSelection(guestCount, reservationDate, reservationTime);
+
+      if (!availabilityValidation.valid) {
+        formError.textContent = availabilityValidation.message;
+        formError.style.display = "block";
+        await updateTimeSlotOptions(true);
+        return;
+      }
+    } catch (availabilityError) {
+      formError.textContent = availabilityError.message || "Unable to validate availability at this time.";
       formError.style.display = "block";
       return;
     }
@@ -725,10 +1174,12 @@ if (reservationForm) {
       const response = await fetch(googleAppsScriptUrl, {
         method: "POST",
         body: JSON.stringify({
+          action: "createReservation",
           name,
           phone,
           email,
           person,
+          guestCount,
           "reservation-date": reservationDate,
           "reservation-time": reservationTime,
           message
@@ -753,6 +1204,8 @@ if (reservationForm) {
         formSuccess.textContent = result.message;
         formSuccess.style.display = "block";
         reservationForm.reset();
+        availabilityCache.delete(reservationDate);
+        await updateTimeSlotOptions(true);
 
         // Hide success message after 5 seconds and scroll to top
         setTimeout(() => {
